@@ -55,7 +55,7 @@ This repository contains the analysis pipeline and findings for identifying uniq
 - Eukaryotes exhibit the greatest diversity of taxonomic quasi-prime peptides due to their complex proteomes.
 
 ### Functional Roles
-- Enriched in proteins linked to key traits, such as neuronal functions in Chordata and redox reactions in archaea and bacteria.
+- Enriched in proteins linked to key traits, such as neuronal functions in Chordata and redox reactions in Archaea and Bacteria.
 - Significant roles in transmembrane transport, ion binding, and metabolic pathways.
 
 ### Structural Adaptations
