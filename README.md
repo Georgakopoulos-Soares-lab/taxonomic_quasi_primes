@@ -5,6 +5,21 @@ This repository contains the analysis pipeline and findings for identifying uniq
 
 ---
 
+## How to use
+Clone this repository and then run the files in this order:
+1. descriptive_statistics.ipynb
+2. multi_phylum_GOEA_pre_processing.ipynb
+3. multi_phylum_GOEA.ipynb
+4. multi_phylum_protein_entry_analysis_pre_processing.ipynb
+5. multi_phylum_protein_entry_analysis.ipynb
+6. combine_enrichment_results.ipynb
+7. multi_phylum_enrichment_plots.ipynb
+8. sec_struct_clustermaps.ipynb
+9. alphamissense_analysis.ipynb
+
+Supplementary scripts for taxonomic quasi-prime peptide extraction from PDB files and the secondary structure prediction using STRIDE are also provided.
+---
+
 ## Key Objectives
 1. **Identification of Taxonomic Quasi-Prime Peptides:**
    - Define k-mer peptides (short peptide sequences of length k) exclusive to specific taxonomic groups.
