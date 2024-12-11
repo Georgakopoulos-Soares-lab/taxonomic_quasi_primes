@@ -16,7 +16,8 @@ Clone this repository and then run the files in this order:
 7. multi_phylum_enrichment_plots.ipynb
 8. sec_struct_clustermaps.ipynb
 9. alphamissense_analysis.ipynb
-\nSupplementary scripts for taxonomic quasi-prime peptide extraction from PDB files and the secondary structure prediction using STRIDE are also provided.
+
+**Supplementary scripts for taxonomic quasi-prime peptide extraction from PDB files and the secondary structure prediction using STRIDE are also provided.**
 ---
 
 ## Key Objectives
