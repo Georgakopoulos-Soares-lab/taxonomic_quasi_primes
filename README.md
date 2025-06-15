@@ -53,10 +53,6 @@ This repository contains the analysis pipeline and findings for identifying uniq
 
 ---
 
-## Detailed explanation for each script present in the repository
-
-
-
 ## Citation
 
 The citation will be placed here after publication.
@@ -65,48 +61,3 @@ The citation will be placed here after publication.
 For any questions or support, please contact:
 * izg5139@psu.edu
 * left.bochalis@gmail.com
-
-
-## How to extract your own taxonomic quasi-prime raw data
-1. **Install Google SparseHash:**
-    * **Ubuntu/Debian:**
-       ```bash
-       sudo apt-get install libsparsehash-dev
-       ```
-    * **CentOS/RHEL/Fedora:**
-       ```bash
-       # For older versions using yum
-       sudo yum install sparsehash-devel
-
-       # For newer versions using dnf
-       sudo dnf install sparsehash-devel
-       ```
-   * **macOS (with [Homebrew](https://brew.sh/))**:
-       ```bash
-       brew install google-sparsehash
-       ```
-2.  **Make sure have a C++11 compatible compiler and then compile the C++ scripts present in the `extraction_scripts` directory:**
-    ```bash
-    g++ -std=c++11 -O2 -o superkingdom_qps superkingdom_qps.cpp
-    g++ -std=c++11 -O2 -o kingdom_qps kingdom_qps.cpp
-    g++ -std=c++11 -O2 -o phylum_qps phylum_qps.cpp
-    ```
-3. **Download proteome data from the [UniProt database](https://www.uniprot.org/)**
-4. **Obtain a tab-separated file, that maps each proteome to a specific taxonomic rank:**
-    The file must contain 2 columns, one with the proteome ID and one with the assigned taxonomic rank.
-    For example, if you want to extract data at the superkingdom level the mapping file should look like this:
-    ```text
-    UP000000242_399549  Archaea
-    UP000000536_69014   Archaea
-    UP000000263_383372	Bacteria
-    UP000000268_329726	Bacteria
-    UP000813426_2823209	Eukaryota
-    UP000815604_1639000	Eukaryota
-    UP000202218_1923543	Viruses
-    UP000202219_1821537	Viruses
-    ```
-5. **Extract quasi-primes:**
-    Using the desired compiled C++ script, you can extract 
-    For exam
-    ```bash
-    ./superkingdom_qps input_mappings.txt output_results.txt
