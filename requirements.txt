@@ -6,19 +6,20 @@
 # -------------------------------------------------------------------
 
 aiohttp
+blosum
 ete3
 goatools
+graphviz
 matplotlib
 nest-asyncio
 numpy
 pandas
 polars
 pycirclize
+pyyaml
 requests
 scikit-learn
 scipy
 seaborn
-statsmodels
 tqdm
 umap-learn
-PyYAML

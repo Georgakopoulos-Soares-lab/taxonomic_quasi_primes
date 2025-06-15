@@ -50,6 +50,8 @@ This repository contains the analysis pipeline and findings for identifying uniq
     7. multi_phylum_enrichment_plots.ipynb
     8. sec_struct_clustermaps.ipynb
     9. alphamissense_analysis.ipynb
+    10. substitution_pre
+    11. substitution analysis
 
 ---
 
