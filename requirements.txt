@@ -1,0 +1,24 @@
+# -------------------------------------------------------------------
+# Python Dependencies for the Taxonomic Quasi-Primes Project
+#
+# Install these dependencies using the following command:
+# pip install -r requirements.txt
+# -------------------------------------------------------------------
+
+aiohttp
+ete3
+goatools
+matplotlib
+nest-asyncio
+numpy
+pandas
+polars
+pycirclize
+requests
+scikit-learn
+scipy
+seaborn
+statsmodels
+tqdm
+umap-learn
+PyYAML
