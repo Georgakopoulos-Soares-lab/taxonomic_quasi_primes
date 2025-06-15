@@ -8,77 +8,21 @@
 #    unless you have intentionally altered the data directory structure.
 # -------------------------------------------------------------------
 
-# The absolute path to the main data storage directory.
-# CHANGE THIS PATH to match your local environment.
-base_dir: "/storage/group/izg5139/default"
+paths:
+  # Base directory for relative paths
+  base_dir: ''
 
-# --- Relative Input Data Paths ---
-# These paths are relative to the base_dir defined above.
-inputs:
-  lefteris_data_dir: "lefteris"
-  michalis_data_dir: "michalis/taxonomic_prot/RESTORED/taxonomic_prot"
-  
-  # Paths for raw quasi-prime extractions (from descriptive_statistics.ipynb)
-  superkingdom_5mers: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/mapping/final_superkingdom_5mers.txt"
-  superkingdom_6mers: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/mapping/final_superkingdom_6mers.txt"
-  superkingdom_7mers: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/mapping/final_superkingdom_7mers.txt"
+  # Input directories
+  inputs:
+    # This path is absolute in your script, so we'll treat it as such.
+    mapping_files: ''
+    # This path was constructed relative to base_dir
+    quasi_prime_extractions: ''
 
-  kingdom_6mers: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/mapping/final_kingdom_6mers.txt"
-  kingdom_7mers: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/mapping/final_kingdom_7mers.txt"
-  
-  phylum_6mers: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/mapping/final_phyla_6mers.txt"
-  phylum_7mers: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/mapping/final_phyla_7mers.txt"
-
-  # Paths for UMAP analysis
-  umap_mappings: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/mappings.txt"
-  umap_species_qp_search: "michalis/taxonomic_prot/RESTORED/taxonomic_prot/search_results/search_results_7mers.txt"
-
-  # Paths for GOEA and Protein Entry analysis
-  go_obo_file: "lefteris/multi_species_goea_files/go-basic.obo"
-  uniprot_gaf_parquet: "lefteris/multi_species_goea_files/goa_uniprot_all.parquet"
-  interpro_db_parquet: "lefteris/multi_species_entry_enrichment_files/interpro_database.parquet"
-  taxid_mapping_main: "lefteris/taxid_mapping.parquet"
-  uniprot_idmapping_file: "lefteris/peptide_match_files/uniprot_2024_01_reference_proteomes/reference_proteomes_2024_01_taxid_mappings.idmapping"
-
-  # Path for AlphaMissense analysis
-  alphamissense_hg38: "lefteris/alphamissense_files/AlphaMissense_hg38.tsv"
-  
-  # Path for structural analysis
-  pdb_files: "lefteris/multi_species_structural_analysis_files/model_and_health_alphafold_pdbs/"
-  secondary_structure_results: "lefteris/multi_species_structural_analysis_files/secondary_structures.txt"
+  # Output directories (these will be created relative to base_dir)
+  outputs:
+    plots: 'plots'
+    peptides_over_90: 'qp_peptides_over_90_per_phylum'
 
 
-# --- Output & Results Paths ---
-# These paths are relative to your Git repository's root directory.
-outputs:
-  # Base directory for all generated results
-  results_base: "analysis_results/"
-  
-  # Subdirectories for specific analysis steps
-  plots: "outputs/plots/"
-  tables: "outputs/tables/"
-  pdb_extractions: "outputs/pdb_extractions/"
-
-  # Formatted reference mappings from pre-processing steps
-  formatted_reference_mappings: "analysis_results/formatted_reference_mappings/"
-  qp_peptides_over_90: "analysis_results/qp_peptides_over_90_per_phylum/"
-  
-  # GOEA outputs
-  phylum_associations: "analysis_results/goea/phylum_associations/"
-  phylum_study_populations_goea: "analysis_results/goea/phylum_study_populations/"
-  phylum_background_populations_goea: "analysis_results/goea/phylum_background_populations/"
-  multi_species_goea_results: "analysis_results/goea/multi_species_goea_results/"
-  combined_go_terms: "analysis_results/goea/combined_gene_ontology_results/"
-  
-  # Protein entry analysis outputs
-  domain_enrichment_results: "analysis_results/entry_enrichment/domain_enrichment_results/"
-  family_enrichment_results: "analysis_results/entry_enrichment/family_enrichment_results/"
-
-  combined_domain_enrichment: "analysis_results/entry_enrichment/combined_domain_enrichment_results/"
-  combined_family_enrichment: "analysis_results/entry_enrichment/combined_family_enrichment_results/"
-
-  phylum_study_domains: "analysis_results/entry_enrichment/phylum_study_domains/"
-  phylum_study_families: "analysis_results/entry_enrichment/phylum_study_families/"
-
-  phylum_background_domains: "analysis_results/entry_enrichment/phylum_background_domains/"
-  phylum_background_families: "analysis_results/entry_enrichment/phylum_background_families/"
+    

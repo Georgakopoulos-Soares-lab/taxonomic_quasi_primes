@@ -33,7 +33,15 @@ This repository contains the analysis pipeline and findings for identifying uniq
     ```
 6. **Configure the `config.yaml` file to contain the paths specific to your enviroment**
 7. **Execute the Python scripts in this order**
-    1. descriptive_statistics.ipynb
+    1. descriptive_statistics.py
+       * This script loads the extracted taxonomic quasi-primes for all three taxonomic ranks, calculates statistics and plots Figure 2 and 3a.
+          
+          Run using the command:
+          
+          ```bash
+           python descriptive_statistics.py <path to the config.yaml file>
+           ```
+           
     2. multi_phylum_GOEA_pre_processing.ipynb
     3. multi_phylum_GOEA.ipynb
     4. multi_phylum_protein_entry_analysis_pre_processing.ipynb
