@@ -1,4 +1,9 @@
-# Unraveling diversity by isolating peptide sequences specific to distinct taxonomic groups
+# Taxonomic quasi-primes: peptides charting lineage-specific adaptations and disease-relevant loci
+
+## Graphical Abstract
+<p align="center">
+  <img src="graphical_abstract.png" alt="Abstract" width="1000"/>
+</p>
 
 ## Overview
 This repository contains the analysis pipeline and findings for identifying unique peptide sequences, termed **taxonomic quasi-prime peptides**, that are specific to taxonomic groups. By analyzing proteomes across 24,073 species, the study identifies these peptides unique to superkingdoms, kingdoms, and phyla, offering insights into evolutionary divergence and functional roles.
