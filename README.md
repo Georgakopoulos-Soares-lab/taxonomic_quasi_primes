@@ -10,6 +10,8 @@ This repository contains the analysis pipeline for identifying unique peptide se
   <img src="graphical_abstract.png" alt="Abstract" width="1000"/>
 </p>
 
+---
+
 ## How to reproduce
 1. **Clone this repository:**
    
@@ -268,6 +270,8 @@ This repository contains the analysis pipeline for identifying unique peptide se
 ## Citation
 
 The citation will be placed here after publication.
+
+---
 
 ## Contact
 For any questions or support, please contact:
