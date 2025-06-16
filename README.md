@@ -49,7 +49,7 @@ This repository contains the analysis pipeline and findings for identifying uniq
     
     Instructrions to install the STRIDE (Structural identification) algorithm can be found in the [ssbio documentation](https://ssbio.readthedocs.io/en/latest/instructions/stride.html)
 
-8. **Install GNU parallel, which is used to process PDB files in parallel in the secondary structure evaluation step**
+8. **Install GNU parallel, which is used to process PDB files in parallel in the secondary structure evaluation step.**
 
 9. **Make the C program to extract taxonomic quasi-prime regions from PDB files:**
     
@@ -57,9 +57,9 @@ This repository contains the analysis pipeline and findings for identifying uniq
     gcc -fopenmp -O2 -o pdb_quasi_prime_extractor pdb_quasi_prime_extractor.c
     ```
 
-10. **Configure the `config.yaml` file to contain the paths specific to your enviroment**
+10. **Configure the `config.yaml` file to contain the paths specific to your enviroment.**
 
-11. **Execute the Python scripts in this order**
+11. **Execute the Python scripts in this order:**
     1. `descriptive_statistics.py`
        * This script loads the extracted taxonomic quasi-primes for all three taxonomic ranks, calculates statistics and plots Figure 2 and 3a.
           
