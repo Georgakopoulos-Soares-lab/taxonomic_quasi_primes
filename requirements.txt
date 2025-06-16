@@ -5,6 +5,7 @@
 # pip install -r requirements.txt
 # -------------------------------------------------------------------
 
+ast
 aiohttp
 blosum
 ete3
@@ -23,3 +24,5 @@ scipy
 seaborn
 tqdm
 umap-learn
+graphviz
+statsmodels
