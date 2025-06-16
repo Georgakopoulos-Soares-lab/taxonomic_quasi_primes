@@ -8,13 +8,28 @@ import multiprocessing
 from pathlib import Path
 from collections import defaultdict
 from scipy.stats import fisher_exact
+import yaml
+import argparse
 
-# Base directory for data storage
-base_dir = Path("/storage/group/izg5139/default/lefteris/")
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
+
 
 # Set input and output directories
-entry_enrichment_input_dir = base_dir / "multi_species_entry_enrichment_files"
-entry_enrichment_output_dir = entry_enrichment_input_dir / "multi_species_entry_enrichment_results"
+entry_enrichment_input_dir = Path(config['protein_entry_files_dir'])
+entry_enrichment_output_dir = Path(config['protein_entry_output_dir'])
 
 # Define directories containing the study and background populations for the protein domains and protein families
 analysis_dirs = {

@@ -15,6 +15,23 @@ from goatools.obo_parser import GODag
 from goatools.semsim.termwise.wang import SsWang
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import squareform
+import yaml
+import argparse
+
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
 
 # Apply nest_asyncio to allow nested event loops in Jupyter
 nest_asyncio.apply()
@@ -34,8 +51,8 @@ colormaps={
 }
 
 # Base directory for data storage
-mspeea_results_dir = pathlib.Path("/storage/group/izg5139/default/lefteris/multi_species_entry_enrichment_files/multi_species_entry_enrichment_results")
-msgoea_results_dir = pathlib.Path("/storage/group/izg5139/default/lefteris/multi_species_goea_files/multi_species_goea_results")
+mspeea_results_dir = pathlib.Path(config['protein_entry_output_dir']) / "multi_species_entry_enrichment_results"
+msgoea_results_dir = pathlib.Path(config['multi_species_goea_files_dir']) / "multi_species_goea_results"
 
 combined_enrichment_dirs = {
     "combined_domains": mspeea_results_dir / 'combined_domain_enrichment_results',
@@ -51,11 +68,11 @@ patterns = {
 }
 
 # Create a directory to save the plots
-plots = pathlib.Path("plots")
-plots.mkdir(exist_ok=True)
+plots_dir = Path(config['plots_dir'])
+plots_dir.mkdir(parents=True, exists_ok=True)
 
 # Load GO DAG
-godag = GODag('/storage/group/izg5139/default/lefteris/multi_species_goea_files/go-basic.obo', optional_attrs={'relationship'})
+godag = GODag(config['obo_file'], optional_attrs={'relationship'})
 
 go_term_mapping = {
     "Beta-ureidopropionase activity": "Beta-ureidopropionase",
@@ -1325,46 +1342,46 @@ def create_clustered_dot_plot(
 create_clustered_dot_plot(
     filtered_enrichment_dfs['domains'], 
     "Short_Name",
-    plots / "domains_dotplot.svg", 
+    plots_dir / "domains_dotplot.svg", 
     colormaps['domains'], 
-    plots / "domains_colorbar.svg",  
-    plots / "domains_size_legend.svg",
+    plots_dir / "domains_colorbar.svg",  
+    plots_dir / "domains_size_legend.svg",
     size_legend = True)
 
 create_clustered_dot_plot(
     filtered_enrichment_dfs['families'], 
     "Short_Name",
-    plots / "families_dotplot.svg", 
+    plots_dir / "families_dotplot.svg", 
     colormaps['families'], 
-    plots / "families_colorbar.svg",  
-    plots / "families_size_legend.svg",
+    plots_dir / "families_colorbar.svg",  
+    plots_dir / "families_size_legend.svg",
     size_legend = False)
 
 create_clustered_dot_plot(
     filtered_enrichment_dfs['go_terms'].filter(pl.col('Class') == 'biological_process'), 
     "Entry",
-    plots / "biological_process.svg", 
+    plots_dir / "biological_process.svg", 
     colormaps['biological_process'], 
-    plots / "biological_process_colorbar.svg", 
-    plots / "biological_process_size_legend.svg",
+    plots_dir / "biological_process_colorbar.svg", 
+    plots_dir / "biological_process_size_legend.svg",
     size_legend = False)
 
 create_clustered_dot_plot(
     filtered_enrichment_dfs['go_terms'].filter(pl.col('Class') == 'molecular_function'), 
     "Entry",
-    plots / "molecular_function.svg", 
+    plots_dir / "molecular_function.svg", 
     colormaps['molecular_function'], 
-    plots / "molecular_function_colorbar.svg", 
-    plots / "molecular_function_size_legend.svg",
+    plots_dir / "molecular_function_colorbar.svg", 
+    plots_dir / "molecular_function_size_legend.svg",
     size_legend = False)
 
 create_clustered_dot_plot(
     filtered_enrichment_dfs['go_terms'].filter(pl.col('Class') == 'cellular_component'), 
     "Entry",
-    plots / "cellular_component.svg", 
+    plots_dir / "cellular_component.svg", 
     colormaps['cellular_component'], 
-    plots / "cellular_component_colorbar.svg", 
-    plots / "cellular_component_size_legend.svg",
+    plots_dir / "cellular_component_colorbar.svg", 
+    plots_dir / "cellular_component_size_legend.svg",
     size_legend = False)
 
 # Define a list of representative phyla that are present in the clustered go terms to keep
@@ -1551,7 +1568,7 @@ def create_lollipop_plot(top_clustered_go_terms: pl.DataFrame, go_term_mapping: 
 
     sns.despine()
     plt.tight_layout(pad=0.2) 
-    plt.savefig(plots / f"{go_class}_lollipop.svg", bbox_inches='tight', pad_inches=0.1) 
+    plt.savefig(plots_dir / f"{go_class}_lollipop.svg", bbox_inches='tight', pad_inches=0.1) 
     plt.close()
 
     # Create separate legend plot with adjusted size
@@ -1562,7 +1579,7 @@ def create_lollipop_plot(top_clustered_go_terms: pl.DataFrame, go_term_mapping: 
     leg = fig_legend.legend(handles=legend_elements, title='Cluster Sizes', 
                           loc='center', fontsize=6, title_fontsize=7)
     plt.axis('off')
-    fig_legend.savefig(plots / f'{go_class}_cluster_size_legend.svg', 
+    fig_legend.savefig(plots_dir / f'{go_class}_cluster_size_legend.svg', 
                       bbox_inches='tight', pad_inches=0.05)
     plt.close()
 
@@ -1675,7 +1692,7 @@ ax.set_xticklabels(x_labels, rotation=90, ha='center', fontsize=12)
 
 sns.despine()
 
-plt.savefig('stacked_bar_plot.svg', dpi=300, bbox_inches='tight', pad_inches=0)
+plt.savefig(plots_dir / 'stacked_bar_plot.svg', dpi=300, bbox_inches='tight', pad_inches=0)
 plt.show()
 
 # Create separate legend figure
@@ -1702,6 +1719,6 @@ ax_legend.legend(handles, labels,
 
 ax_legend.axis('off')
 
-plt.savefig('legend.svg', dpi=300, bbox_inches='tight', pad_inches=0)
+plt.savefig(plots_dir / 'legend.svg', dpi=300, bbox_inches='tight', pad_inches=0)
 
 plt.close('all')

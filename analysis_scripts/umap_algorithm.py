@@ -7,19 +7,36 @@ from umap import UMAP
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import sparse
+import yaml
+import argparse
+
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
 
 # Enable StringCache for effective Categorical data handling
 pl.enable_string_cache()
 
-sns.set_style("ticks")
+sns.set_style("ticks",{'font.family':'serif', 'font.serif':'Microsoft Sans Serif'})
+plt.style.use('seaborn-v0_8-ticks')
 sns.set_context("paper")
 
-# Set up base directories
-base_dir = Path("/storage/group/izg5139/default/lefteris")
-species_dir = Path("/storage/group/izg5139/default/michalis/taxonomic_prot/RESTORED/taxonomic_prot/search_results")
+plots_dir = Path(config['plots_dir'])
+plots_dir.mkdir(parents=True, exists_ok=True)
 
 # File containing mappings of taxons to superkingdoms
-mappings = pl.read_csv("/storage/group/izg5139/default/michalis/taxonomic_prot/RESTORED/taxonomic_prot/mappings.txt", new_columns=['col'])
+mappings = pl.read_csv(config['proteome_to_superkingdom_file'], new_columns=['col'])
 
 # Format the file
 mappings = mappings.select(
@@ -35,8 +52,8 @@ mappings = mappings.with_columns([
 ]).drop("filename")
 
 # Read all the phylum quasi-prime data and the data containing their mapped proteins
-phylum_quasi_primes = pl.read_csv(base_dir / "phylum_7mers_all.txt", separator='\t').drop("QP_peptide_length")
-species_quasi_primes = pl.read_csv(species_dir / "search_results_7mers.txt", separator ='\t')
+phylum_quasi_primes = pl.read_csv(config['phylum_7mers'], separator='\t').drop("QP_peptide_length")
+species_quasi_primes = pl.read_csv(config['7mers_to_proteome_file'], separator ='\t')
 
 # Cast to data types with lower memory requirement 
 phylum_quasi_primes = phylum_quasi_primes.with_columns([
@@ -44,7 +61,7 @@ phylum_quasi_primes = phylum_quasi_primes.with_columns([
     pl.col("Taxonomy").cast(pl.Categorical),
     pl.col("Epsilon_score").cast(pl.Float32),   
     pl.col("Domain").cast(pl.Categorical)
-    ])
+])
 
 # Add the Superkingdom label to the data and cast to more efficient data types
 species_quasi_primes = (species_quasi_primes
@@ -82,7 +99,6 @@ def filter_by_epsilon_percentile(df: pl.DataFrame) -> pl.DataFrame:
         pl.col('Epsilon_score') >= pl.col('percentile_50')
     ).drop('percentile_50')
     return filtered_df
-
 
 filtered_phylum_quasi_primes = filter_by_epsilon_percentile(phylum_quasi_primes)
 species_quasi_primes_with_scores = species_quasi_primes.join(filtered_phylum_quasi_primes, on='QP_peptide').drop("Taxonomy")
@@ -209,5 +225,5 @@ plt.tight_layout()
 sns.despine()
 
 # Show the plot
-plt.savefig("umap.svg")
+plt.savefig(plots_dir / "umap.svg")
 plt.show()

@@ -5,15 +5,34 @@ from typing import *
 import seaborn as sns
 from scipy import stats
 from pathlib import Path
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+import yaml
+import argparse
 
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
+
+plots_dir = Path(config['plots_dir'])
+plots_dir.mkdir(parents=True, exists_ok=True)
+
+sns.set_style("ticks",{'font.family':'serif', 'font.serif':'Microsoft Sans Serif'})
+plt.style.use('seaborn-v0_8-ticks')
 sns.set_context("paper")
 
-# Base directory for data storage
-base_dir = Path("/storage/group/izg5139/default/lefteris/")
-
 # Directory that contains the structural data 
-structural_analysis_dir = base_dir / "multi_species_structural_analysis_files/"
+structural_analysis_dir = Path(config['structural_analysis_dir'])
 
 # Lists containing taxon ids for model organisms and global health risk organisms present in the dataset
 model_organisms_taxon_ids = [
@@ -410,5 +429,5 @@ def create_clustermap(visualisation_data: pd.DataFrame, colorbar: str, output_fi
     legend_file_path = output_file_path.replace('.svg', '_legend.svg')
     create_category_legend(category_colors, legend_file_path)
 
-create_clustermap(model_organisms_vis, "viridis", "model_organisms_sec_structures.svg")
-create_clustermap(global_health_vis, "cividis", "global_health_sec_structures.svg")
+create_clustermap(model_organisms_vis, "viridis", plots_dir / "model_organisms_sec_structures.svg")
+create_clustermap(global_health_vis, "cividis", plots_dir / "global_health_sec_structures.svg")

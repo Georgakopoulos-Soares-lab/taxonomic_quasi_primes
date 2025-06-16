@@ -5,13 +5,35 @@ from typing import *
 import seaborn as sns 
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+import yaml
+import argparse
+
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
+
+plots_dir = Path(config['plots_dir'])
+plots_dir.mkdir(parents=True, exists_ok=True)
 
 # Setup base directories
-base_dir = Path("/storage/group/izg5139/default/lefteris")
-alphamissense_data = base_dir / 'alphamissense_files'
+alphamissense_data = Path(config['alphamissense_data_dir'])
 
 # Read Chordata quasi-prime data 
-chordata_quasi_primes = pl.read_csv(base_dir/"qp_peptides_over_90_per_phylum/formated_reference_mappings/Chordata_formated_reference_mappings.txt", separator = '\t')
+chordata_quasi_primes = pl.read_csv(
+    config['peptide_match_dir'] / "formated_reference_mappings" / "Chordata_formated_reference_mappings.txt",
+    separator = '\t'
+)
 
 # Read human AlphaMissense data 
 hg38_missense_data = pl.read_csv(alphamissense_data/ 'AlphaMissense_hg38.tsv', 
@@ -165,5 +187,5 @@ plt.ylim(top=8)
 plt.tight_layout()
 plt.grid(zorder=0, alpha=0.8, linewidth=0.5)
 sns.despine()
-plt.savefig("pathogenicity.svg")
+plt.savefig(plots_dir / "pathogenicity.svg")
 plt.show()

@@ -3,14 +3,29 @@ import glob
 import polars as pl 
 from typing import *
 from pathlib import Path
+import yaml
+import argparse
 
-# Base directory for data storage
-base_dir = Path("/storage/group/izg5139/default/lefteris/")
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
+
 
 # Set input and output directories
-entry_enrichment_input_dir = base_dir / "multi_species_entry_enrichment_files"
-entry_enrichment_output_dir = entry_enrichment_input_dir / "multi_species_entry_enrichment_results"
-formated_reference_mappings_dir = base_dir / 'qp_peptides_over_90_per_phylum/formated_reference_mappings'
+entry_enrichment_input_dir = Path(config['protein_entry_files_dir'])
+entry_enrichment_output_dir = Path(config['protein_entry_output_dir'])
+formated_reference_mappings_dir = Path(config['peptide_match_dir']) / "formated_reference_mappings"
 
 # Output directories setup
 output_dirs = {
@@ -26,8 +41,8 @@ for dir_path in output_dirs.values():
     os.makedirs(dir_path, exist_ok=True)
 
 # Read data
-taxon_id_mappings = pl.read_parquet(base_dir / "taxid_mapping.parquet")
-interpro_database = pl.read_parquet(entry_enrichment_input_dir / "interpro_database.parquet")
+taxon_id_mappings = pl.read_parquet(config['taxid_mappings_parquet'])
+interpro_database = pl.read_parquet(config['interpro_db_parquet'])
 
 # Filter interpro database to keep only domain and family entries
 domains_and_families = interpro_database.filter(

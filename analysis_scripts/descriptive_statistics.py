@@ -32,14 +32,11 @@ args = parser.parse_args()
 with open(args.config_file, 'r') as f:
     config = yaml.safe_load(f)
 
-# Set paths from the loaded configuration
-base_dir = Path(config['paths']['base_dir'])
-new_files_dir = Path(config['paths']['inputs']['mapping_files'])
+plots_dir = Path(config['plots_dir'])
+plots_dir.mkdir(parents=True, exists_ok=True)
 
-# Construct paths relative to the base directory
-original_files_dir = base_dir / config['paths']['inputs']['quasi_prime_extractions']
-results_dir = base_dir / config['paths']['outputs']['plots']
-output_dir_peptides_over_90 = base_dir / config['paths']['outputs']['peptides_over_90']
+processed_files_dir = Path(config['processed_files_dir'])
+processed_files_dir.mkdir(parents=True, exists_ok=True)
 
 # Enable string cache in Polars for performance improvements
 pl.enable_string_cache()
@@ -107,6 +104,7 @@ def read_quasi_prime_peptide_data(qp_file_path: str,
         pl.col("QP_peptide_length").cast(pl.Categorical)
     ])
     return qp_peptides_df
+
 # This is a nested dictionary with the exact mapping of how the data are classifiied in domains, kingdoms and phyla
 # The data are ordered as follows:
 #     Domain
@@ -236,9 +234,9 @@ def sort_dictionary(domain_to_kingdom_to_phylum):
 domain_to_kingdom_to_phylum = sort_dictionary(domain_to_kingdom_to_phylum)
 
 # Read and format domain data
-domains_5mers = read_quasi_prime_peptide_data(new_files_dir / 'final_superkingdom_5mers.txt', '5mer')
-domains_6mers = read_quasi_prime_peptide_data(new_files_dir / 'final_superkingdom_6mers.txt', '6mer')
-domains_7mers = read_quasi_prime_peptide_data(new_files_dir / 'final_superkingdom_7mers.txt', '7mer')
+domains_5mers = read_quasi_prime_peptide_data(config['superkingdom_5mers'], '5mer')
+domains_6mers = read_quasi_prime_peptide_data(config['superkingdom_6mers'], '6mer')
+domains_7mers = read_quasi_prime_peptide_data(config['superkingdom_7mers'], '7mer')
 
 # Concatenate dataframes of 6mer and 7mer Quasi prime peptides
 domain_QPs = pl.concat([domains_6mers, domains_7mers])
@@ -423,7 +421,7 @@ def plot_domain_epsilon_score_density(domain_QPs: pl.DataFrame,
     # Save the plot without legend
     sns.despine()
     plt.grid(visible=True, which='major', alpha=0.7)
-    plt.savefig(f'domain_qp_peptide_kde_plot_for_{qp_peptide_length}s.svg', format="svg", dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.savefig(plots_dir / f'domain_qp_peptide_kde_plot_for_{qp_peptide_length}s.svg', format="svg", dpi=300, bbox_inches='tight', pad_inches=0)
     plt.show()
     
     # Create a separate legend
@@ -442,7 +440,7 @@ def plot_domain_epsilon_score_density(domain_QPs: pl.DataFrame,
         legend_ax.axis('off')
 
         # Save the legend as a separate file
-        legend_fig.savefig(f'domain_qp_peptide_kde_plot_legend.svg', format="svg", dpi=300, bbox_inches='tight', pad_inches=0)
+        legend_fig.savefig(plots_dir / f'domain_qp_peptide_kde_plot_legend.svg', format="svg", dpi=300, bbox_inches='tight', pad_inches=0)
         
         return fig, legend_fig
     else:
@@ -468,8 +466,8 @@ kde_7mers = plot_domain_epsilon_score_density(domain_QPs,
                                               separate_legend = False)
 
 # Read and format kingdom data
-kingdoms_6mers = read_quasi_prime_peptide_data(new_files_dir / 'final_kingdom_6mers.txt', '6mer')
-kingdoms_7mers = read_quasi_prime_peptide_data(new_files_dir / 'final_kingdom_7mers.txt', '7mer')
+kingdoms_6mers = read_quasi_prime_peptide_data(config['kingdom_6mers'], '6mer')
+kingdoms_7mers = read_quasi_prime_peptide_data(config['kingdom_7mers'], '7mer')
 
 # Concatenate dataframes of 6mer and 7mer Quasi prime peptides
 kingdom_QPs = pl.concat([kingdoms_6mers, kingdoms_7mers])
@@ -681,7 +679,7 @@ def plot_kingdom_epsilon_scores(kingdom_QPs: pl.DataFrame,
     ax1.grid(visible=True, which='major', alpha=0.7)
     ax2.grid(visible=True, which='major', alpha=0.7)
     sns.despine()
-    plt.savefig(f'kingdom_qp_peptide_combined_plot_for_{qp_peptide_length}s.svg',format="svg", dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.savefig(plots_dir / f'kingdom_qp_peptide_combined_plot_for_{qp_peptide_length}s.svg',format="svg", dpi=300, bbox_inches='tight', pad_inches=0)
     plt.close()
 
     return fig
@@ -697,8 +695,8 @@ combined_plot_7mers = plot_kingdom_epsilon_scores(kingdom_QPs,
                                                   qp_peptide_length = '7mer')
 
 # Read and format phylum data
-phyla_6mers = read_quasi_prime_peptide_data(new_files_dir / 'final_phyla_6mers.txt', '6mer')
-phyla_7mers = read_quasi_prime_peptide_data(new_files_dir / 'final_phyla_7mers.txt', '7mer')
+phyla_6mers = read_quasi_prime_peptide_data(config['phylum_6mers'], '6mer')
+phyla_7mers = read_quasi_prime_peptide_data(config['phylum_7mers'], '7mer')
 
 # Concatenate dataframes of 6mer and 7mer Quasi prime peptides
 phylum_QPs = pl.concat([phyla_6mers, phyla_7mers])
@@ -857,7 +855,8 @@ else:
 # print(tree.get_ascii(show_internal=True))
 
 # Save the tree in Newick format with domain features
-tree.write(outfile="complete_phylogenetic_tree.nwk", format=1, features=['domain'])
+output_tree_file = processed_files_dir / "complete_phylogenetic_tree.nwk"
+tree.write(outfile=output_tree_file, format=1, features=['domain'])
 
 def calculate_summary_statistics(phylum_QPs: pl.DataFrame) -> pd.DataFrame:
 
@@ -888,9 +887,9 @@ domain_summary_statistics = calculate_summary_statistics(domain_QPs)
 kingdom_summary_statistics = calculate_summary_statistics(kingdom_QPs)
 phylum_summary_statistics = calculate_summary_statistics(phylum_QPs)
 
-domain_summary_statistics.to_csv('domains_summary.csv')
-kingdom_summary_statistics.to_csv('kingdoms_summary.csv')
-phylum_summary_statistics.to_csv('phyla_summary.csv')
+domain_summary_statistics.to_csv(processed_files_dir / 'domains_summary.csv')
+kingdom_summary_statistics.to_csv(processed_files_dir / 'kingdoms_summary.csv')
+phylum_summary_statistics.to_csv(processed_files_dir / 'phyla_summary.csv')
 
 def format_label(t):
     # Replace underscores with spaces
@@ -912,7 +911,7 @@ phylum_summary_statistics.index = phylum_summary_statistics.index.map(
 
 # Create the phylogenetic tree plot
 circos, tv = Circos.initialize_from_tree(
-    "complete_phylogenetic_tree.nwk",
+    output_tree_file,
     outer=True,
     start=10,
     end=350,
@@ -1012,7 +1011,7 @@ cbar_6mer.ax.set_title('6mer ε-score (%)', fontsize=18, pad=10)
 cbar_7mer.ax.set_title('7mer ε-score (%)', fontsize=18, pad=10)
 
 # Save the figure as a SVG file
-plt.savefig('phylum_circos_plot.svg', format="svg", dpi=600, bbox_inches='tight', pad_inches=0)
+plt.savefig(plots_dir / 'phylum_circos_plot.svg', format="svg", dpi=600, bbox_inches='tight', pad_inches=0)
 plt.show()
 
 # Create a dictionary with superkingdom representative phyla to showcase as much of the superkingdoms diversity
@@ -1113,7 +1112,7 @@ def plot_phylum_epsilon_score_distribution(phylum_QPs: pl.DataFrame,
     # Save the figure
     plt.grid(visible=True, which='major', alpha=0.7)
     sns.despine()
-    plt.savefig(f'phylum_qp_peptide_boxenplot_for_{qp_peptide_length}s.svg', format="svg", dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.savefig(plots_dir / f'phylum_qp_peptide_boxenplot_for_{qp_peptide_length}s.svg', format="svg", dpi=300, bbox_inches='tight', pad_inches=0)
     plt.show()
     
     return fig
@@ -1185,8 +1184,9 @@ phylum_qps_over_90_df = pl.concat(phylum_qps_over_90_list)
 # Group by Taxonomy and collect unique peptides
 grouped_phyla = phylum_qps_over_90_df.group_by('Taxonomy').agg(pl.col('QP_peptide').unique())
 
+output_dir_peptides_over_90 = processed_files_dir / "qp_peptides_over_90_per_phylum"
 # Create a directory to store the output files
-os.makedirs(output_dir_peptides_over_90, exist_ok=True)
+output_dir_peptides_over_90.mkdir(parents=True, exists_ok=True)
 
 # Iterate through each taxonomy and write peptides to files
 for row in grouped_phyla.iter_rows():
@@ -1195,7 +1195,7 @@ for row in grouped_phyla.iter_rows():
     # Create a valid filename
     filename = f"{taxonomy.replace(' ', '_').replace('/', '_')}.txt"
     # Use the path from the config file here
-    filepath = os.path.join(output_dir_peptides_over_90, filename)
+    filepath = output_dir_peptides_over_90 / filename
     
     # Write peptides to file
     with open(filepath, 'w') as f:

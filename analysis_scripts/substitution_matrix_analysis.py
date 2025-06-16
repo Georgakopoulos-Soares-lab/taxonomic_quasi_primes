@@ -9,6 +9,26 @@ import ast
 import polars as pl
 import graphviz
 import numpy as np
+import yaml
+import argparse
+
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
+
+plots_dir = Path(config['plots_dir'])
+plots_dir.mkdir(parents=True, exists_ok=True)
 
 sys.setrecursionlimit(100000)
 
@@ -264,12 +284,10 @@ cm_data = [
       
 oslo_map = mcolors.LinearSegmentedColormap.from_list('oslo', cm_data)  
 
-base_dir = Path("/storage/group/izg5139/default/lefteris/taxonomic_qps_project")
-substitution_analysis_dir = Path(base_dir/"substitution_matrix_analysis")
-reference_proteomes_dir = Path(base_dir/"peptide_match_files"/"uniprot_2024_01_reference_proteomes")
+substitution_analysis_dir = Path(config['substitution_analysis_dir'])
 
 variant_mappings = pd.read_csv(
-    substitution_analysis_dir / "variant_peptide_match_results.txt", 
+    config['substitution_analysis_peptide_match_results'], 
     sep ='\t', 
     comment='#',
     header=None,
@@ -334,12 +352,12 @@ def read_quasi_prime_peptide_data(qp_file_path: str,
     return qp_peptides_df
 
 phylum_quasi_prime_7mers = read_quasi_prime_peptide_data(
-    "/storage/group/izg5139/default/lefteris/taxonomic_qps_project/quasi_prime_extractions/taxonomic_phylum_percentages_7mers.txt", 
+    config['phylum_7mers'], 
     "7mer"
 )
 
 protein_to_taxid = pd.read_csv(
-    reference_proteomes_dir / "reference_proteomes_2024_01_taxid_mappings.idmapping",
+    config['substitution_analysis_id_mapping'],
     sep='\t',
     header=None,
     names=[
@@ -362,7 +380,7 @@ final_variant_mappings = final_variant_mappings.astype({
 final_variant_mappings = final_variant_mappings.fillna("No match")
 
 full_lineage = pd.read_csv(
-    substitution_analysis_dir / "rankedlineage.dmp", 
+    config['ranked_lineage_file'], 
     sep ='\t',
     header=None,
     names=[
@@ -402,7 +420,7 @@ missing_taxon_ids = pd.DataFrame({
 full_lineage = pd.concat([full_lineage, missing_taxon_ids], ignore_index=True)
 
 updated_taxon_ids = pd.read_csv(
-    substitution_analysis_dir / "merged.dmp",
+    config['merged_dmp_file'],
     sep='\t',
     header=None,
     names=[
@@ -498,7 +516,7 @@ plt.text(0, 0, f'{category_counts.sum():,}\nVariants',
 
 
 plt.tight_layout()
-plt.savefig(substitution_analysis_dir / "pie_chart.svg", format='svg', bbox_inches='tight', pad_inches=0)
+plt.savefig(plots_dir / "pie_chart.svg", format='svg', bbox_inches='tight', pad_inches=0)
 plt.show()
 
 palette = {
@@ -548,7 +566,7 @@ plt.grid(visible=True, which='major', alpha=0.7)
 
 sns.despine()
 plt.tight_layout()
-plt.savefig(substitution_analysis_dir / "protein_distribution.svg", format='svg', bbox_inches='tight', pad_inches=0)
+plt.savefig(plots_dir / "protein_distribution.svg", format='svg', bbox_inches='tight', pad_inches=0)
 plt.show()
 
 def parse_string_list(s):
@@ -602,7 +620,7 @@ g.ax_heatmap.set_ylabel('Taxonomic Quasi-Prime Variant Superkingdom Distribution
 g.ax_heatmap.tick_params(axis='y', which='both', length=0)
 g.ax_heatmap.tick_params(axis='x', labelsize=10)
 
-plt.savefig(substitution_analysis_dir / "clustermap.svg", format='svg', bbox_inches='tight', pad_inches=0)
+plt.savefig(plots_dir / "clustermap.svg", format='svg', bbox_inches='tight', pad_inches=0)
 plt.show()
 
 fully_eukaryotic_qps = heatmap_data[heatmap_data['Eukaryota']==100.0].index.tolist()
@@ -745,7 +763,7 @@ for index, row in data_for_tree.iterrows():
     my_trie.insert(row['QP_peptide'], row['Epsilon_score'])
 
 dot = visualize_trie(my_trie)
-dot.render('trie_for_top_qp', format='svg', view=True)
+dot.render(plots_dir / 'trie_for_top_qp', format='svg', view=True)
 
 bracket_notation = my_trie.to_bracket_notation()
 print(f"Bracket Notation: {bracket_notation}")

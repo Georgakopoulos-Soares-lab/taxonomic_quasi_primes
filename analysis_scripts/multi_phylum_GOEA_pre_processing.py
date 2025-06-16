@@ -4,13 +4,27 @@ import json
 from typing import *
 from pathlib import Path
 import polars as pl
+import yaml
+import argparse
 
-# Base directory where files are stored
-base_dir = Path('/storage/group/izg5139/default/lefteris/')
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
 
 # Analysis directories
-reference_mappings_dir = base_dir / 'qp_peptides_over_90_per_phylum'
-multi_species_goea_files_dir = base_dir / 'multi_species_goea_files'
+reference_mappings_dir = Path(config['peptide_match_dir'])
+multi_species_goea_files_dir = Path(config['multi_species_goea_files_dir'])
 
 # Output directories setup
 output_dirs = {
@@ -26,10 +40,10 @@ for dir_path in output_dirs.values():
     os.makedirs(dir_path, exist_ok=True)
 
 # Contains associations of UniProt protein accessions to Gene Ontology terms
-uniprot_gaf = pl.read_parquet(base_dir / "multi_species_goea_files/goa_uniprot_all.parquet")
+uniprot_gaf = pl.read_parquet(config['goa_db_parquet_file'])
 
 # Contains mappins of UniProt protein accessions to Taxon IDs
-taxon_id_mappings = pl.read_parquet(base_dir / 'multi_species_goea_files/reference_proteomes_2024_01_taxid_mappings.parquet')
+taxon_id_mappings = pl.read_parquet(config['taxid_mappings_parquet'])
 
 def read_peptide_match_results(file_path: str) -> pl.DataFrame:
     """

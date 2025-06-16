@@ -1,9 +1,31 @@
 import blosum as bl
 from pathlib import Path
 import pandas as pd
+import yaml
+import argparse
 
-base_dir = Path("/storage/group/izg5139/default/lefteris/taxonomic_qps_project/")
-qp_over_90_dir = base_dir.joinpath("qp_peptides_over_90_per_phylum")
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
+
+plots_dir = Path(config['plots_dir'])
+plots_dir.mkdir(parents=True, exists_ok=True)
+
+processed_files_dir = Path(config['processed_files_dir'])
+qp_over_90_dir = processed_files_dir / "qp_peptides_over_90_per_phylum"
+substitution_analysis_dir = Path(config['substitution_analysis_dir'])
+
 blosum62_matrix = bl.BLOSUM(62)
 unknown_codes = ['B', 'Z', 'J', 'X', '*']
 
@@ -30,8 +52,8 @@ def generate_substitution_variants(peptide):
 
 chordata_qp_over_90['Variants'] = chordata_qp_over_90['QP_peptide'].apply(generate_substitution_variants)
 
-output_file = base_dir.joinpath("substitution_matrix_analysis").joinpath("all_chordata_variants.txt")
-output_df_path = base_dir.joinpath("substitution_matrix_analysis").joinpath("qps_with_variants.txt")
+output_file = substitution_analysis_dir.joinpath("all_chordata_variants.txt")
+output_df_path = substitution_analysis_dir.joinpath("qps_with_variants.txt")
 chordata_qp_over_90.to_csv(output_df_path, sep='\t', index=False)
 
 all_variants_series = chordata_qp_over_90['Variants'].explode()

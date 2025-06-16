@@ -7,12 +7,26 @@ import multiprocessing
 from pathlib import Path
 from goatools.obo_parser import GODag
 from goatools.go_enrichment import GOEnrichmentStudy
+import yaml
+import argparse
 
-# Base directory where files are stored
-base_dir = Path('/storage/group/izg5139/default/lefteris/')
+# Set up the argument parser
+parser = argparse.ArgumentParser(description="Run the taxonomic analysis pipeline.")
+parser.add_argument(
+    "config_file",
+    type=str,
+    help="Path to the configuration YAML file."
+)
+
+# Parse arguments
+args = parser.parse_args()
+
+# Load the yaml file with the specified file paths
+with open(args.config_file, 'r') as f:
+    config = yaml.safe_load(f)
 
 # Multi Species Gene Ontology Enrichmert Analysis input directory
-multi_species_goea_files_dir = base_dir / 'multi_species_goea_files'
+multi_species_goea_files_dir = Path(config['multi_species_goea_files_dir'])
 
 # Output directories setup
 input_dirs = {
@@ -49,7 +63,7 @@ def perform_multi_species_goea(study_populations, background_populations, associ
     
     """
     # Load the Gene Ontology graph structure from OBO file
-    go_obo = GODag(multi_species_goea_files_dir / "go-basic.obo", prt=None)
+    go_obo = GODag(config['obo_file'], prt=None)
     
     # Extract the relevant data for the specified Taxon ID
     taxon_study_population = study_populations[taxon_id]
