@@ -167,7 +167,7 @@ This repository contains the analysis pipeline for identifying unique peptide se
          python combine_enrichment_results.py <path to the config.yaml file>
          ```
         
-    9. `multi_phylum_enrichment_plots.ipynb`
+    9. `multi_phylum_enrichment_plots.py`
          * This script creates the combined enrichment plots present in figures 4, 5, 6, 7.
 
          Run this command:
